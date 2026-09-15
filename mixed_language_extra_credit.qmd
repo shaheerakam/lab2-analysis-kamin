@@ -1,0 +1,56 @@
+---
+title: "Mixed Language Extra Credit"
+format: html
+editor: visual
+---
+
+## Setup
+
+```{r}
+library(reticulate)
+library(tidyverse)
+```
+
+## Load data in Python
+
+```{python}
+import pandas as pd
+
+admissions_py = pd.read_csv("https://physionet.org/files/mimic-iv-demo/2.2/hosp/admissions.csv.gz")
+admissions_py.head()
+```
+
+## Hand it to R and finish the analysis there
+
+```{r}
+admissions_r <- py$admissions_py
+
+admissions_r <- admissions_r %>%
+  mutate(los_days = as.numeric(
+    as.POSIXct(dischtime) - as.POSIXct(admittime),
+    units = "days"
+  ))
+
+admissions_r %>%
+  select(hadm_id, admittime, dischtime, los_days) %>%
+  head()
+```
+
+```{r}
+admissions_r %>%
+  summarize(
+    avg_los = mean(los_days, na.rm = TRUE),
+    max_los = max(los_days, na.rm = TRUE),
+    n = n()
+  )
+```
+
+```{r}
+ggplot(admissions_r, aes(x = los_days)) +
+  geom_histogram(binwidth = 2, fill = "#B2182B") +
+  labs(
+    x = "Length of Stay (days)",
+    y = "Number of Admissions",
+    title = "Distribution of Length of Stay (data loaded in Python, analyzed in R)"
+  )
+```
