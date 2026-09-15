@@ -1,0 +1,55 @@
+---
+title: "lab2_analysis.qmd"
+format: html
+editor: visual
+---
+
+## Setup
+
+```{r}
+library(tidyverse)
+```
+
+## Load Data
+
+```{r}
+admissions <- read_csv("https://physionet.org/files/mimic-iv-demo/2.2/hosp/admissions.csv.gz")
+diagnoses <- read_csv("https://physionet.org/files/mimic-iv-demo/2.2/hosp/diagnoses_icd.csv.gz")
+```
+
+## Transform Data
+
+```{r}
+admissions <- admissions %>%
+  mutate(los_days = as.numeric(dischtime - admittime, units = "days"))
+
+admissions %>% select(hadm_id, admittime, dischtime, los_days) %>% head()
+
+los_by_diagnosis <- admissions %>%
+  inner_join(diagnoses, by = "hadm_id") %>%
+  group_by(icd_code) %>%
+  summarize(avg_los = mean(los_days), n = n()) %>%
+  filter(n >= 2) %>%
+  arrange(desc(avg_los))
+
+los_by_diagnosis %>% head(10)
+```
+
+## Visualization
+```{r}
+los_by_diagnosis %>%
+  head(10) %>%
+  ggplot(aes(x = reorder(icd_code, avg_los), y = avg_los, fill = avg_los)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_gradient(low = "#FDB863", high = "#B2182B") +
+  labs(x = "ICD Code", y = "Average Length of Stay (days)",
+       title = "Top 10 Diagnoses by Average Length of Stay") +
+  theme(legend.position = "none")
+```
+
+## Interpretation
+Among admissions in this 100-patient demo sample, diagnosis code I951 had the longest average length of stay at 26.5 days, though that's based on only 2 admissions with that code. Several of the top 10 codes — E9319, E9331, 5570, K7201 — clustered in a similar 24–26 day range, also mostly with just 2 matching admissions each, which makes we wary of reading too much into small differences between them. Code 2639 is a bit more interesting since it had 5 admissions (more than any other code in the top 10) and still averaged 24.9 days, suggesting that pattern might hold up better than the others if the sample were larger. Overall, this small demo dataset hints at which diagnoses tend to come with longer hospital stays, but with sample sizes this small, I'd want a much bigger dataset before drawing real conclusions.
+
+## AI Assistance
+I used Claude to help write the R code for loading the MIMIC-IV data, walking me through how to calculating length of stay, joining with diagnoses, and building the chart.
