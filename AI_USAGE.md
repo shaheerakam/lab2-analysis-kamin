@@ -23,9 +23,22 @@
   using the Console, creating code chunks, and rendering the document —
   I did not know this beforehand.
 - Helped draft this README.md and AI_USAGE.md file structure.
-- Walked me through setting up `reticulate` for the
-  mixed-language extra credit notebook, since this wasn't covered in
-  lecture.
+
+### Extra credit (mixed_language_extra_credit.qmd)
+- Explained reticulate as a way to mix R and Python in one Quarto
+  document, since this wasn't covered in lecture.
+- Walked me through the steps to write the code for
+   the setup chunk (`library(reticulate)`), the Python chunk that
+  loads the admissions data with pandas, and the R chunk that receives
+  it via `py$admissions_py` and continues the analysis (length-of-stay
+  calculation, summary stats, and a histogram).
+- Helped debug a `ModuleNotFoundError: No module named 'pandas'` error —
+  the fix was running `reticulate::py_install("pandas")` in the R
+  console, since reticulate's private Python environment only had numpy
+  installed by default.
+- Helped catch a file-naming mistake (the file had accidentally been
+  saved as `mixed_language_extra_credit.qmd.qmd` with a double
+  extension) so it could be corrected to the exact required name.
 
 ## What I did myself
 
